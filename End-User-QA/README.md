@@ -1,10 +1,10 @@
-#End-User-QA.ps1
+# End-User-QA.ps1
 
 Creates a log file and populates it with information from the computer as well as various software/settings checks.
 
-1.Hostname
-2.Serial Number
-3.Windows version and activation status
+..* Hostname
+..* Serial Number
+..* Windows version and activation status
 4.Office version and activation status
 5.Kaseya install check as well as server and group info
 6.Trend Micro WFBSS check and service status
