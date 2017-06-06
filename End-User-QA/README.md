@@ -5,7 +5,7 @@ Creates a log file and populates it with information from the computer as well a
 * Hostname
 * Serial Number
 * Windows version and activation status
-* Office version and activation status
+* Office version and activation status (does not account for multiple versions installed)
 * Kaseya install check as well as server and group info
 * Trend Micro WFBSS check and service status
 * Flash player status and version numbers (only works if installed via .exe)
