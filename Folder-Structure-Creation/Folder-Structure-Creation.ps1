@@ -7,7 +7,7 @@ Uses an external csv file to read in information.  Must contain 5 headers.
     Domain  -   name of domain users will be a part of, insert on first line only
 #>
 
-Function Set-FullAccessRule($share, $domain, $user)
+Function Set-FullAccessRule($Share, $Domain, $User)
 {
     $accessRule = New-Object System.Security.AccessControl.FileSystemAccessRule("$domain\$user","FullControl","ContainerInherit, ObjectInherit","None","Allow")
     $acl = Get-Acl $share
@@ -15,7 +15,7 @@ Function Set-FullAccessRule($share, $domain, $user)
     Set-Acl $share $acl
 }
 
-Function Set-ModifyAccessRule($share, $domain, $user)
+Function Set-ModifyAccessRule($Share, $Domain, $User)
 {
     $accessRule = New-Object System.Security.AccessControl.FileSystemAccessRule("$domain\$user","Modify","ContainerInherit, ObjectInherit","None","Allow")
     $acl = Get-Acl $share
@@ -23,7 +23,7 @@ Function Set-ModifyAccessRule($share, $domain, $user)
     Set-Acl $share $acl
 }
 
-Function Set-ReadAccessRule($share, $domain, $user)
+Function Set-ReadAccessRule($Share, $Domain, $User)
 {
     $accessRule = New-Object System.Security.AccessControl.FileSystemAccessRule("$domain\$user","ReadAndExecute","ContainerInherit, ObjectInherit","None","Allow")
     $acl = Get-Acl $share
