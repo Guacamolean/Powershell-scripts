@@ -1,4 +1,4 @@
-Function Set-RegistryValues($path,$name)
+Function Set-RegistryValues($Path,$Name)
 {
     IF (Get-ItemProperty -Path $path -Name $name -ErrorAction SilentlyContinue){
         Set-ItemProperty -Path $path -Name $name -Value 0
@@ -15,7 +15,7 @@ $network = "{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}"
 $trayPath = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Explorer"
 $trayKey = "EnableAutoTray"
 
-Set-RegistryValues -path $desktopPath -name $myComputer
-Set-RegistryValues -path $desktopPath -name $userFiles
-Set-RegistryValues -path $desktopPath -name $network
-Set-RegistryValues -path $trayPath -name $trayKey
+Set-RegistryValues -Path $desktopPath -Name $myComputer
+Set-RegistryValues -Path $desktopPath -Name $userFiles
+Set-RegistryValues -Path $desktopPath -Name $network
+Set-RegistryValues -Path $trayPath -Name $trayKey
