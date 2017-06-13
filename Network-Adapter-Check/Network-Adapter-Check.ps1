@@ -59,9 +59,6 @@ function Get-DnsSettings{
 
         New-Object pscustomobject -Property $hash
     )
-
-    $wiredDNS = $results | Where-Object {($_.Interface -eq "Local Area Connection") -or ($_.Interface -eq "Ethernet")}
-    $wirelessDNS = $results | Where-Object {$_.Interface -like "Wireless*" -or $_.Interface -like "Wi-Fi"}
 }
 
 Write-Log "**********************************Network Adapter Check*********************************************"
@@ -76,7 +73,9 @@ IF ($ethernet.NetEnabled -eq $false){
 }
 
 Start-Sleep 10
-Get-DnsSettings
+$results = Get-DnsSettings
+$wiredDNS = $results | Where-Object {($_.Interface -eq "Local Area Connection") -or ($_.Interface -eq "Ethernet")}
+$wirelessDNS = $results | Where-Object {$_.Interface -like "Wireless*" -or $_.Interface -like "Wi-Fi"}
 IF ($wirelessDNS.configuration -eq "Static"){
     netsh.exe interface ipv4 set dns "$($wirelessDNS.Interface)" dhcp
 }
