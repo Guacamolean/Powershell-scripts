@@ -32,12 +32,16 @@ function Get-OfficeStatus
         $officeVersion = "Office 2010"
         } 
         ELSEIF (Test-Path 'C:\Program Files (x86)\Microsoft Office\Office15\ospp.vbs'){
-        $officePath = "C:\Program Files (x86)\Microsoft Office\Office15"
-        $officeVersion = "Office 2013"
+            $officePath = "C:\Program Files (x86)\Microsoft Office\Office15"
+            $officeVersion = "Office 2013"
         }
         ELSEIF (Test-Path 'C:\Program Files (x86)\Microsoft Office\Office16\ospp.vbs'){
-        $officePath = "C:\Program Files (x86)\Microsoft Office\Office16"
-        $officeVersion = "Office 2016"
+            $officePath = "C:\Program Files (x86)\Microsoft Office\Office16"
+            $officeVersion = "Office 2016"
+        }
+        ELSEIF (Test-Path 'C:\Program Files\Microsoft Office\Office16\ospp.vbs'){
+            $officePath = "C:\Program Files\Microsoft Office\Office16"
+            $officeVersion = "Office 2016"
         }
         ELSE {
         $officePath = $Null
