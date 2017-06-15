@@ -1,12 +1,12 @@
 Add-Type -AssemblyName PresentationFramework
 
 Function Get-SiteCode {
-[void][Reflection.Assembly]::LoadWithPartialName('Microsoft.VisualBasic')
+    [void][Reflection.Assembly]::LoadWithPartialName('Microsoft.VisualBasic')
 
-$title = 'Device renaming script'
-$message = 'Enter site code'
-$siteCode = [Microsoft.VisualBasic.Interaction]::InputBox($message, $title)
-return $siteCode
+    $title = 'Device renaming script'
+    $message = 'Enter site code'
+    $siteCode = [Microsoft.VisualBasic.Interaction]::InputBox($message, $title)
+    return $siteCode
 }
 
 
