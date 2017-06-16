@@ -63,7 +63,7 @@ function Get-DnsSettings{
 
 Write-Log "**********************************Network Adapter Check*********************************************"
 
-$ethernet = Get-WmiObject -Class Win32_NetworkAdapter | Where-Object {($_.Name -like "*Ethernet Connection*") -or ($_.Name -like "*Gigabit*")}
+$ethernet = Get-WmiObject -Class Win32_NetworkAdapter | Where-Object {($_.Name -like "*Ethernet Connection*") -or ($_.Name -like "*Gigabit*") -or ($_.Name -like "*GBE Family*")}
 IF ($ethernet.NetEnabled -eq $false){
     $ethernetEnable = $ethernet.enable()
     Switch ($ethernetEnable.ReturnValue){
