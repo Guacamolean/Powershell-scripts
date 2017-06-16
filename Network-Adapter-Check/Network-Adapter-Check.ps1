@@ -75,7 +75,7 @@ IF ($ethernet.NetEnabled -eq $false){
 Start-Sleep 10
 $results = Get-DnsSettings
 $wiredDNS = $results | Where-Object {($_.Interface -eq "Local Area Connection") -or ($_.Interface -eq "Ethernet") -or ($_.Name -like "*GBE Family*")}
-$wirelessDNS = $results | Where-Object {$_.Interface -like "Wireless*" -or $_.Interface -like "Wi-Fi"}
+$wirelessDNS = $results | Where-Object {($_.Interface -like "Wireless*") -or ($_.Interface -eq "Wi-Fi")}
 IF ($wirelessDNS.configuration -eq "Static"){
     netsh.exe interface ipv4 set dns "$($wirelessDNS.Interface)" dhcp
 }
