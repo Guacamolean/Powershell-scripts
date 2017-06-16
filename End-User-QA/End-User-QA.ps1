@@ -98,7 +98,7 @@ function Get-Trend
     }
 }
 
-function Get-FlashPlayer ($version)
+function Get-FlashPlayer ($Version)
 {
     $flashPlayer = Get-ChildItem -Path HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall,HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall | `
     Get-ItemProperty | Where-Object {$_.DisplayName -like "Adobe Flash Player*$version"}
@@ -222,9 +222,9 @@ Get-WindowsStatus
 Get-OfficeStatus
 Get-Kaseya
 Get-Trend
-Get-FlashPlayer -version "ActiveX"
-Get-FlashPlayer -version "PPAPI"
-Get-FlashPlayer -version "NPAPI"
+Get-FlashPlayer -Version "ActiveX"
+Get-FlashPlayer -Version "PPAPI"
+Get-FlashPlayer -Version "NPAPI"
 Get-Java
 Get-DnsSettings
 Get-Drivers
