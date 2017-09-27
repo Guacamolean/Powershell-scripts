@@ -9,10 +9,22 @@ $bios = Get-WmiObject -Class Win32_Bios
 
 #------------FUNCTIONS----------
 
-function Write-Log 
-{
-    $output = $args[0] | Out-String
-    Add-Content -Path $logFile -Value $output.Replace("`n","")
+function Write-Log {
+    Param(
+        [Parameter(
+            Mandatory=$True
+        )]
+        [String]
+        $String,
+
+        [Parameter(
+            Mandatory=$True
+        )]
+        [String]
+        $Color
+    )
+    Add-Content -Path $logFile -Value $String
+    Write-Host $String -ForegroundColor $Color
 }
 
 function Get-WindowsStatus 
@@ -20,8 +32,8 @@ function Get-WindowsStatus
     $osVersion = Get-WmiObject Win32_OperatingSystem | Select-Object Caption
     $windowsStatus = Get-WmiObject SoftwareLicensingProduct -Filter "ApplicationID = '55c92734-d682-4d71-983e-d6ec3f16059f'" | Where-Object {$_.LicenseStatus -eq "1" -or $_.LicenseStatus -eq "2"}
     Switch ($windowsStatus.LicenseStatus){
-	    "1" {Write-Log "$($osVersion.Caption) : Activated."}
-	    "2" {Write-Log "$($osVersion.Caption) : Not activated."}
+	    "1" {Write-Log "$($osVersion.Caption) : Activated." "Green"}
+	    "2" {Write-Log "$($osVersion.Caption) : Not activated." "Red"}
     }
 }
 
@@ -49,21 +61,21 @@ function Get-OfficeStatus
     IF ($officePath){
         $officeStatus = cscript $officePath\ospp.vbs /dstatus | Select-String -Pattern "License Status" -SimpleMatch
         IF ($officeStatus -like "*LICENSED*"){
-            Write-Log "$officeVersion : Activated."
+            Write-Log "$officeVersion : Activated." "Green"
         }
         ELSE {
-            Write-Log "$officeVersion : Not activated."
+            Write-Log "$officeVersion : Not activated." "Yellow"
         }
     }
     ELSE {
-        Write-Log "Office : Not installed."
+        Write-Log "Office : Not installed." "Red"
     }
 }
 
 function Get-Kaseya 
 {
     $kaseya = Get-Service -DisplayName "Kaseya*"
-    $kaseyaDirectory = Get-ChildItem 'C:\Program Files (x86)' -recurse -include kaseyad.ini | Select-Object DirectoryName
+    $kaseyaDirectory = Get-ChildItem 'C:\Program Files (x86)' -recurse -include kaseyad.ini -ErrorAction SilentlyContinue | Select-Object DirectoryName
     IF ($kaseya){
         $kaseyaObject = @(
             ForEach ($directory in $kaseyaDirectory){
@@ -78,11 +90,11 @@ function Get-Kaseya
             }
             )
     ForEach ($install in $kaseyaObject){
-        Write-Log "Kaseya checking into $($install.Group) on $($install.Server)."
+        Write-Log "Kaseya checking into $($install.Group) on $($install.Server)." "Green"
     }
     }
     ELSE {
-        Write-Log "Could not find Kaseya installed!"
+        Write-Log "Could not find Kaseya installed!" "Red"
     }
 }
 
@@ -90,11 +102,14 @@ function Get-Trend
 {
     $trend = Get-Service -DisplayName "Trend Micro*Security Agent"
     IF ($trend){
-        Write-Log "Trend Micro : Installed."
-        Write-Log "$($trend.DisplayName) : $($trend.Status)"
+        Write-Host "Trend Micro : Installed." -ForegroundColor "Green"
+        Switch($trend.Status){
+            'Running'{Write-Log "$($trend.DisplayName) : $($trend.Status)" "Green"}
+            'Stopped'{Write-Host "$($trend.DisplayName) : $($trend.Status)" "Yellow"}
+        }
     }
 	ELSE {
-	    Write-Log "Trend Micro : Not installed."
+	    Write-Log "Trend Micro : Not installed." "Red"
     }
 }
 
@@ -104,10 +119,10 @@ function Get-FlashPlayer ($Version)
     Get-ItemProperty | Where-Object {$_.DisplayName -like "Adobe Flash Player*$version"}
   
     IF ($flashPlayer){
-        Write-Log "Adobe Flash Player $version $($flashPlayer.DisplayVersion) : Installed."
+        Write-Log "Adobe Flash Player $version $($flashPlayer.DisplayVersion) : Installed." "Green"
     }
     else {
-        Write-Log "Adobe Flash Player $version : Not installed."
+        Write-Log "Adobe Flash Player $version : Not installed." "Yellow"
     }
 }
 
@@ -118,11 +133,11 @@ function Get-Java
     
     IF ($java){
         foreach ($javaInstall in $java){
-        Write-Log "$($javaInstall.DisplayName) : Installed."
+        Write-Log "$($javaInstall.DisplayName) : Installed." "Green"
         } 
     }
     Else {
-        Write-Log "Java : Not installed."
+        Write-Log "Java : Not installed." "Red"
     }
 }
 
@@ -175,9 +190,17 @@ function Get-DnsSettings
     $wirelessDNS = $results | Where-Object {$_.Interface -like "Wireless*" -or $_.Interface -like "Wi-Fi"}
 
     IF ($wiredDNS){
-        Write-Log "$($wiredDNS.Interface) DNS : $($wiredDNS.Configuration)."}
+        Switch ($wiredDNS.Configuration){
+            'DHCP' {Write-Log "$($wiredDNS.Interface) DNS : $($wiredDNS.Configuration)." "Green"}
+            'Static' {Write-Log "$($wiredDNS.Interface) DNS: $($wiredDNS.Configuration)." "Yellow"}
+        }
+    }
     IF ($wirelessDNS){
-        Write-Log "$($wirelessDNS.Interface) DNS : $($wirelessDNS.Configuration)."}
+        Switch ($wirelessDNS.Configuration){
+            'DHCP' {Write-Log "$($wirelessDNS.Interface) DNS : $($wirelessDNS.Configuration)." "Green"}
+            'Static' {Write-Log "$($wirelessDNS.Interface) DNS : $($wirelessDNS.Configuration)." "Yellow"}
+        }
+    }
 }
 
 function Get-Drivers
@@ -185,7 +208,10 @@ function Get-Drivers
     $drivers = Get-WmiObject Win32_PNPEntity | Where-Object {$_.ConfigManagerErrorCode -ne 0} | Select-Object Name
     IF ($drivers){
         foreach ($driver in $drivers){
-            Write-Log "$($driver.Name) is reporting a driver error."}
+            Write-Log "$($driver.Name) is reporting a driver error." "Red"} 
+    }
+    Else {
+        Write-Log "No driver errors being reported." "Green"
     }
 }
 
@@ -197,38 +223,53 @@ function Get-DiskInfo
         $size = $disk.Size/1GB
         $percentFree = [math]::Round($freeSpace/$size*100)
         $driveLetter = $disk.DeviceID
-        Write-Log "$driveLetter $percentFree% available."
+        IF ($percentFree -lt 25){
+            Write-Log "$driveLetter $percentFree% available." "Red"
+        }
+        else {
+            Write-Log "$driveLetter $percentFree% available" "Green"
+        }
     }
-}
+}   
 
 function Get-SystemRestore
 {
     $systemRestore = Get-WmiObject -Namespace 'root\default' -Class SystemRestoreConfig
     IF ($systemRestore.RPSessionInterval -eq "1"){
-        Write-Log "System Restore : Enabled using $($systemRestore.DiskPercent)% disk space."
+        Write-Log "System Restore : Enabled using $($systemRestore.DiskPercent)% disk space." "Green"
     }
     ELSE {
-        Write-Log "System Restore : Not enabled."
+        Write-Log "System Restore : Not enabled." "Red"
     }
 }
 
 #----------EXECUTION----------
 
-Write-Log "********************************QA Check************************************************************"
-Write-Log "Software check started at $logTime on $logDate."
-Write-Log "Hostname : $env:COMPUTERNAME."
-Write-Log "Serial Number : $($bios.SerialNumber)"
-Get-WindowsStatus
+Write-Log "********************************QA Check************************************************************" "White"
+Write-Log "Software check started at $logTime on $logDate." "White"
+Write-Log "Hostname : $env:COMPUTERNAME." "White"
+Write-Log "Serial Number : $($bios.SerialNumber)" "White"
+Write-Log "Checking Windows status...." "White"
+Get-WindowsStatus 
+Write-host "Checking Office status..."
 Get-OfficeStatus
+Write-Host "Checking Kaseya status..."
 Get-Kaseya
+Write-Host "Checking Trend status..."
 Get-Trend
+Write-Host "Checking for Flash Player installs..."
 Get-FlashPlayer -Version "ActiveX"
 Get-FlashPlayer -Version "PPAPI"
 Get-FlashPlayer -Version "NPAPI"
+Write-Host "Checking for Java installs.."
 Get-Java
+Write-Host "Checking DNS Settings..."
 Get-DnsSettings
+Write-Host "Checking for driver issues..."
 Get-Drivers
+Write-Host "Getting disk info..."
 Get-DiskInfo
+Write-Host "Checking System Restore settings..."
 Get-SystemRestore
-Write-Log "****************************************************************************************************"
-Write-Log ""
+Write-Log "****************************************************************************************************" "White"
+Read-Host "Script complete.  Results can also be found in $logFile - Press Enter to exit..."
